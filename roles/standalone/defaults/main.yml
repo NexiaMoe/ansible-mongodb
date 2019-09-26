@@ -1,0 +1,6 @@
+---
+# defaults file for standalone
+
+mongo_interface: enp0s8
+mongo_fact: ansible_{{ mongo_interface }}
+mongo_ip: ansible_{{ mongo_interface }}.ipv4.address

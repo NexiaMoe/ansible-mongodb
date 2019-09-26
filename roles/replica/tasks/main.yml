@@ -1,0 +1,69 @@
+---
+
+# Configuring For CentOS/RedHat
+- name: RedHat | Copy MongoDB for Shard Node
+  template:
+    src=mongod.conf.j2
+    dest=/etc/mongod.conf
+    owner=mongod
+    group=mongod
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.node }}"
+
+
+# Configuring Debian
+- name: Debian | Copy MongoDB for Shard Node
+  template:
+    src=mongodb.conf.j2
+    dest=/etc/mongod.conf
+    owner=mongodb
+    group=mongodb
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: RedHat | restart mongodb service
+  service:
+    name: mongod
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Debian | restart mongodb service
+  service:
+    name: mongod
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+
+- wait_for:
+    port: "{{ mongos_port }}"
+    delay: 5
+
+
+
+
+# Initialize Replica
+- name: Initialize replica set
+  run_once: true
+  delegate_to: "{{ play_hosts[0] }}"
+  shell: >
+   /usr/bin/mongo admin --host localhost:{{ mongod_port }} --eval 'printjson(rs.initiate())'
+
+
+- name: Create the file to initialize the mongod replica set
+  template: src=mongod_init.js.j2 dest=/tmp/mongod_init.js
+  when: inventory_hostname == groups['replicacfg'][0]
+
+- name: Initialize the replication set
+  shell: /usr/bin/mongo "localhost:{{ mongod_port }}/admin" /tmp/mongod_init.js
+  ignore_errors: yes

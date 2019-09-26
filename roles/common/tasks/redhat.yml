@@ -1,0 +1,31 @@
+---
+
+- name: RedHat | add MongoDB Repository
+  template:
+    src: mongodb.j2
+    dest: '{{ mongo_yum_repo_path }}/mongodb.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: RedHat | Install Package
+  yum:
+    name:  mongodb-org
+    state: present
+    update_cache: yes
+
+- name: RedHat | add firewall port 27017
+  firewalld:
+    port: 27017/tcp
+    permanent: yes
+    state: enabled
+    immediate: true
+
+- name: RedHat | Reload Firewalld
+  command: firewall-cmd --reload
+
+- name: RedHat | start mongodb service
+  service:
+    name: mongod
+    state: stopped
+    enabled: yes

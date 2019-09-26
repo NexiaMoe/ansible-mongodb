@@ -1,0 +1,18 @@
+db.auth('admin', '');
+
+{% for host in groups.node %}
+  sh.addShard("node/{{hostvars[host].ansible_host}}:{{hostvars[host].mongos_port}}");
+{% endfor %}
+
+printjson(sh.status());
+
+sh.enableSharding("test");
+sh.shardCollection("test.user", {_id : "hashed"} );
+sh.shardCollection("test.messages", { createTime : 1} );
+
+testdb = db.getSiblingDB('test');
+testdb.createUser({
+  user: 'admin',
+  pwd: 'admin',
+  roles: ['readWrite']
+});

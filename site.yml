@@ -1,0 +1,33 @@
+# Sharded
+- hosts: all
+  become: yes
+  become_user: root
+  gather_facts: yes
+  roles:
+  - role: common
+
+- hosts: node
+  become: yes
+  become_user: root
+  gather_facts: yes
+  roles:
+  - role: node
+    tags: setup
+
+- hosts: replicacfg
+  become: yes
+  become_user: root
+  gather_facts: yes
+  roles:
+  - role: replica
+    tags: setup
+
+- hosts: standalone
+  become: yes
+  become_user: root
+  gather_facts: yes
+  roles:
+  - role: standalone
+    tags: 
+      - setup
+      - standalone_setup

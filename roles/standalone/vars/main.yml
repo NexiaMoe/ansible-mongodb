@@ -1,0 +1,11 @@
+---
+configDB: "
+  {%- set hosts = [] -%}
+  {%- for host in groups['replicacfg'] -%}
+    {{- hosts.append( host ~ ':' ~ mongos_port) }}
+  {%- endfor %}
+  {{- hosts | join(',') -}}"
+
+mongo_interface: enp0s8
+mongo_fact: ansible_{{ mongo_interface }}
+mongo_ip: ansible_{{ mongo_interface }}.ipv4.address

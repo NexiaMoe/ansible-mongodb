@@ -1,0 +1,7 @@
+
+rs.initiate()
+{% for host in groups['replicacfg'] %}
+   rs.add("{{hostvars[host]['ansible_host']}}:{{mongod_port}}"),
+{% endfor %}
+
+printjson(rs.status());

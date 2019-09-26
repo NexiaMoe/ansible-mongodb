@@ -1,0 +1,10 @@
+
+rs.initiate()
+
+{% for host in groups['node'] %}
+   rs.add("{{hostvars[host]['ansible_host']}}:{{mongod_port}}")
+{% endfor %}
+
+
+//sh.add("node/{{ ansible_host }}:{{ mongod_port }}")
+printjson(rs.status())

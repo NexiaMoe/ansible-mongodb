@@ -1,0 +1,71 @@
+---
+
+- name: Create the mongos startup file
+  template: src=mongos.service.j2 dest=/etc/systemd/system/mongos.service mode=0655 seuser=system_u
+
+- name: Creates run directory
+  file:
+    path: /var/run/mongodb
+    state: directory
+    owner: mongod
+    group: mongod
+
+# Configuring For CentOS/RedHat
+- name: RedHat | Copy MongoDB for StandAlone
+  template:
+    src=mongod.conf.j2
+    dest=/etc/mongod.conf
+    owner=mongod
+    group=mongod
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+# Configuring Debian
+- name: Debian | Copy MongoDB for StandAlone
+  template:
+    src=mongodb.conf.j2
+    dest=/etc/mongod.conf
+    owner=mongodb
+    group=mongodb
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+# add hostname
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.replicacfg }}"
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.node }}"
+
+# Initialize mongos
+- name: Start the mongodb service
+  systemd: name=mongos state=started daemon_reload=yes enabled=yes
+
+- wait_for:
+    port: "{{ mongos_port }}"
+    delay: 3
+
+- name: Copy the file enable  sharding
+  template: src=mongo_init.js.j2 dest=/tmp/mongos_init.js
+  when: inventory_hostname == groups['standalone'][0]
+
+- name: Create sharding
+  shell: /usr/bin/mongo "localhost:{{ mongos_port }}/admin" /tmp/mongos_init.js
+  when: inventory_hostname == groups['standalone'][0]
+  ignore_errors: yes
+
+
+  

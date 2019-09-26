@@ -1,0 +1,18 @@
+# Don't Forget change the ssh key and User
+# ansible_python_interpreter needed for ubuntu/debian hosts
+
+[all:vars]
+ansible_ssh_private_key_file=mycert
+
+[node]
+node1 ansible_host=192.168.251.100 ansible_user=ajipw ansible_python_interpreter=/usr/bin/python3
+node2 ansible_host=192.168.251.101 ansible_user=root
+
+# add more host for node1 here
+
+[replicacfg]
+mongodb1 ansible_host=192.168.251.102 ansible_user=ajipw ansible_python_interpreter=/usr/bin/python3
+
+
+[standalone]
+standalone1 ansible_host=192.168.251.103 ansible_user=root

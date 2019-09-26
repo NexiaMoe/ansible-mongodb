@@ -1,0 +1,5 @@
+---
+# defaults file for replica
+
+mongo_interface: enp0s8
+ansible_enp0s8: ansible_{{ mongo_interface }}

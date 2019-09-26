@@ -1,0 +1,5 @@
+---
+# defaults file for node
+
+mongo_interface: enp0s8
+mongo_fact: ansible_{{ mongo_interface }}

@@ -1,0 +1,10 @@
+---
+# defaults file for common
+
+mongo_yum_repo_path: '/etc/yum.repos.d'
+mongo_yum_repo_name: 'CentOS $releasever - $basearch - MongoDB'
+mongo_yum_repo_baseurl: 'https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/'
+mongo_yum_repo_gpgcheck: '1'
+mongo_yum_repo_enabled: '1'
+mongo_packages:
+  - mongodb-org
